@@ -3,6 +3,7 @@ import Login from '../views/Login.vue';
 import TaskList from '../views/TaskList.vue';
 import Kanban from '../views/Kanban.vue';
 import Stats from '../views/Stats.vue';
+import { useUserStore } from '../stores/user.js';
 
 const routes = [
   { path: '/login', name: 'Login', component: Login },
