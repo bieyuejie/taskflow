@@ -11,3 +11,42 @@ mock.onPost('/api/login').reply(200, {
   },
   msg: 'ok',
 });
+
+let tasks = [
+  { id: '1', title: '学习Vue3', desc: '组合式API', status: 'todo', priority: 'high', createTime: Date.now() },
+  { id: '2', title: '写登录页', desc: '表单校验', status: 'doing', priority: 'medium', createTime: Date.now() },
+  { id: '3', title: '部署项目', desc: 'Vercel', status: 'done', priority: 'low', createTime: Date.now() }
+]
+
+mock.onGet('/api/tasks').reply((config) => {
+  const { keyword = '', status = '', page = 1, pageSize = 10 } = config.params || {}
+  let list = tasks.filter(t =>
+    t.title.includes(keyword) && (status ? t.status === status : true)
+  )
+  const total = list.length
+  const start = (page - 1) * pageSize
+  const data = list.slice(start, start + Number(pageSize))
+  return [200, { code: 200, data: { list: data, total }, msg: 'ok' }]
+})
+
+mock.onPost('/api/tasks').reply((config) => {
+  const body = JSON.parse(config.data)
+  const task = { id: String(Date.now()), createTime: Date.now(), ...body }
+  tasks.unshift(task)
+  return [200, { code: 200, data: task, msg: '新增成功' }]
+})
+
+mock.onPut(/\/api\/tasks\/\d+/).reply((config) => {
+  const id = config.url.split('/').pop()
+  const body = JSON.parse(config.data)
+  const index = tasks.findIndex(t => t.id === id)
+  if (index === -1) return [200, { code: 400, data: null, msg: '任务不存在' }]
+  tasks[index] = { ...tasks[index], ...body }
+  return [200, { code: 200, data: tasks[index], msg: '编辑成功' }]
+})
+
+mock.onDelete(/\/api\/tasks\/\d+/).reply((config) => {
+  const id = config.url.split('/').pop()
+  tasks = tasks.filter(t => t.id !== id)
+  return [200, { code: 200, data: null, msg: '删除成功' }]
+})
