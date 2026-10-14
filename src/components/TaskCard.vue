@@ -2,7 +2,7 @@
   <div class="task-card">
     <div class="task-card-title">{{ task.title }}</div>
     <div class="task-card-desc">{{ task.desc }}</div>
-    <el-tag size="small" :type="priorityMap[task.priority].type" effect="plain">
+    <el-tag :type="priorityMap[task.priority].type" effect="plain">
       {{ priorityMap[task.priority].label }}
     </el-tag>
   </div>
@@ -25,6 +25,7 @@ const priorityMap = {
 
 <style scoped>
 .task-card {
+  overflow-wrap: anywhere;
   padding: 10px 12px;
   margin-bottom: 10px;
   background: #fff;

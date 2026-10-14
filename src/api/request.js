@@ -6,6 +6,18 @@ const request = axios.create({
   timeout: 10000,
 });
 
+async function handleUnauthorized(msg) {
+  const [{ useUserStore }, { default: router }, { useTaskStore }] = await Promise.all([
+    import('../stores/user'),
+    import('../router'),
+    import('../stores/task'),
+  ]);
+  useUserStore().logout();
+  useTaskStore().clearTasks();
+  ElMessage.error(msg || '未授权，请重新登录');
+  await router.replace('/login');
+}
+
 request.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('taskflow_token');
@@ -18,12 +30,11 @@ request.interceptors.request.use(
 );
 
 request.interceptors.response.use(
-  (response) => {
+  async (response) => {
     const res = response.data;
 
     if (res.code === 401) {
-      localStorage.removeItem('taskflow_token');
-      window.location.href = '/login';
+      await handleUnauthorized(res.msg);
       return Promise.reject(new Error(res.msg || '未授权，请重新登录'));
     }
 
@@ -34,7 +45,11 @@ request.interceptors.response.use(
 
     return res.data;
   },
-  (error) => {
+  async (error) => {
+    if (error.response?.status === 401) {
+      await handleUnauthorized(error.response.data?.msg);
+      return Promise.reject(error);
+    }
     ElMessage.error(error.message || '网络异常，请稍后重试');
     return Promise.reject(error);
   }

@@ -92,6 +92,7 @@
     <TaskDialog
       :visible="dialogVisible"
       :task="currentTask"
+      :submitting="submitting"
       @submit="handleSubmit"
       @close="handleDialogClose"
     />
@@ -129,11 +130,11 @@ const priorityMap = {
 
 const onSearch = debounce(() => {
   if (!isActive) return;
-  taskStore.setKeyword(keyword.value.trim());
+  taskStore.setKeyword(keyword.value.trim()).catch(() => {});
 }, 300);
 
 const onFilter = () => {
-  taskStore.setStatus(status.value);
+  taskStore.setStatus(status.value).catch(() => {});
 };
 
 const formatTime = (timestamp) => {
@@ -170,7 +171,7 @@ const handleSubmit = async (form) => {
       await taskStore.addTask(form);
 
       if (taskStore.query.page > 1) {
-        taskStore.setPage(1);
+        await taskStore.setPage(1);
       }
 
       ElMessage.success('任务新增成功');
@@ -197,7 +198,7 @@ const handleDelete = async (task) => {
     await taskStore.removeTask(task.id);
 
     if (taskStore.taskList.length === 0 && taskStore.query.page > 1) {
-      taskStore.setPage(taskStore.query.page - 1);
+      await taskStore.setPage(taskStore.query.page - 1);
     }
 
     ElMessage.success('任务删除成功');
@@ -211,7 +212,7 @@ const handleDelete = async (task) => {
 };
 
 const handlePageChange = (page) => {
-  taskStore.setPage(page);
+  taskStore.setPage(page).catch(() => {});
 };
 
 onMounted(async () => {
@@ -285,6 +286,8 @@ onUnmounted(() => {
 
   .pagination {
     justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 }
 </style>

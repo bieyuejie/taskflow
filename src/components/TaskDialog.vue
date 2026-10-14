@@ -1,5 +1,13 @@
 <template>
-  <el-dialog :title="task ? '编辑任务' : '新增任务'" :model-value="visible" @close="handleClose">
+  <el-dialog
+    :title="task ? '编辑任务' : '新增任务'"
+    :model-value="visible"
+    width="min(560px, calc(100vw - 32px))"
+    :close-on-click-modal="!submitting"
+    :close-on-press-escape="!submitting"
+    :show-close="!submitting"
+    @close="handleClose"
+  >
     <el-form ref="formRef" :model="form" :rules="rules">
       <el-form-item label="标题" prop="title">
         <el-input v-model="form.title" />
@@ -27,8 +35,8 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSubmit">确定</el-button>
+      <el-button :disabled="submitting" @click="handleClose">取消</el-button>
+      <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
     </template>
   </el-dialog>
 </template>
@@ -37,6 +45,7 @@
 import { reactive, ref, watch } from 'vue';
 
 const props = defineProps({
+  submitting: { type: Boolean, default: false },
   visible: {
     type: Boolean,
     default: false,
@@ -58,7 +67,7 @@ const form = reactive({
 });
 
 const rules = {
-  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+  title: [{ required: true, whitespace: true, message: '请输入标题', trigger: 'blur' }],
   status: [{ required: true, message: '请选择状态', trigger: 'change' }],
   priority: [{ required: true, message: '请选择优先级', trigger: 'change' }],
 };
@@ -98,9 +107,10 @@ const handleClose = () => {
 };
 
 const handleSubmit = async () => {
+  if (props.submitting) return;
   const isValid = await formRef.value.validate().catch(() => false);
   if (!isValid) return;
 
-  emit('submit', { ...form });
+  emit('submit', { ...form, title: form.title.trim() });
 };
 </script>

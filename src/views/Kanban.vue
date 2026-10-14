@@ -16,6 +16,7 @@
           class="task-list"
           ghost-class="ghost-card"
           animation="200"
+          :disabled="taskStore.loading || saving"
           @change="(evt) => handleChange(evt, 'todo')"
         >
           <template #item="{ element }">
@@ -37,6 +38,7 @@
           class="task-list"
           ghost-class="ghost-card"
           animation="200"
+          :disabled="taskStore.loading || saving"
           @change="(evt) => handleChange(evt, 'doing')"
         >
           <template #item="{ element }">
@@ -58,6 +60,7 @@
           class="task-list"
           ghost-class="ghost-card"
           animation="200"
+          :disabled="taskStore.loading || saving"
           @change="(evt) => handleChange(evt, 'done')"
         >
           <template #item="{ element }">
@@ -76,6 +79,7 @@ import TaskCard from '../components/TaskCard.vue';
 import { useTaskStore } from '../stores/task';
 
 const taskStore = useTaskStore();
+const saving = ref(false);
 
 // 三列本地数组，对应模板里三个 v-model
 const todoTasks = ref([]);
@@ -89,18 +93,21 @@ const syncColumns = (list) => {
 };
 
 // 监听 store 里的任务列表，一变化就自动按状态分到三个数组
-watch(() => taskStore.taskList, syncColumns, { immediate: true });
+watch(() => taskStore.allTasks, syncColumns, { immediate: true });
 
 // 拖拽完成后触发：只有卡片被拖入这一列时，才更新状态
 const handleChange = async (evt, newStatus) => {
   if (evt.added) {
     const task = evt.added.element;
+    saving.value = true;
     try {
       await taskStore.updateStatus(task.id, newStatus);
       await taskStore.fetchAllForKanban();
     } catch {
       // 请求层会统一展示错误信息，恢复为 Store 中的最后一次有效状态。
-      syncColumns(taskStore.taskList);
+      syncColumns(taskStore.allTasks);
+    } finally {
+      saving.value = false;
     }
   }
 };
