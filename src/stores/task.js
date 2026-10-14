@@ -45,5 +45,18 @@ export const useTaskStore = defineStore('task', {
       this.query.page = page;
       this.fetchTasks();
     },
+    async fetchAllForKanban() {
+      this.loading = true;
+      try {
+        const res = await getTaskList({ page: 1, pageSize: 1000 });
+        this.taskList = res.list;
+        this.total = res.total;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async updateStatus(id, status) {
+      await updateTask(id, { status });
+    },
   },
 });
