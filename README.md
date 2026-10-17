@@ -65,6 +65,16 @@ src/
 浏览器需检查登录拦截、CRUD 表单、跨列拖拽、统计图显示、空数据、退出，以及 375px/768px/桌面宽度。
 
 尚需补齐注册、完成浏览器验收、确认 ESLint/Prettier 最新稳定版要求并评估配置迁移、优化构建包体积。
-第六阶段还需完成规范 Git 提交和 Vercel 部署；仓库目前配置在 Gitee，尚未验证 GitHub 或线上作品链接。
-部署静态 SPA 时需为 `/login`、`/task-list`、`/kanban`、`/stats` 配置入口回退到 `index.html`。
-没有完成线上验收前，不应在简历中声称已经部署。
+## GitHub Pages 部署
+
+GitHub 仓库为 https://github.com/bieyuejie/taskflow，原 Gitee 远程保留。
+在仓库 Settings → Pages → Source 中选择 GitHub Actions。
+推送到 GitHub 的 master 分支后，`.github/workflows/deploy.yml` 自动检查、构建并发布 dist。
+也可以在 Actions 页面手动运行部署流程。
+
+部署成功后访问 https://bieyuejie.github.io/taskflow/，通过 Actions 确认发布状态。
+Vite base 为 `/taskflow/`，路由使用 hash 模式，页面地址形如 `/taskflow/#/task-list`，刷新不需要服务器配置路由回退。
+本地启动与预览也使用 `/taskflow/` 前缀。部署无需添加密钥或单独部署 Mock 后端。
+
+线上验收需检查登录、任务 CRUD、看板、统计及手机布局；Mock 任务刷新重置的行为不变。
+Vercel 部署尚未验证，不应在简历中声称已经部署到 Vercel。
